@@ -123,8 +123,20 @@ def delete_note(id_):
 
 def list_notes():
     notes = load_data(NOTES_FILE)
+    links = load_data(LINKS_FILE)
+
+    # Kuyruk olanlar: herhangi bir bağlantı listesinde yer alan notlar
+    tail_ids = set()
+    for targets in links.values():
+        tail_ids.update(targets)
+
     for id_, content in notes.items():
-        print(f"[{get_short_id(id_)}] {content}")
+        short_id = get_short_id(id_)
+        if id_ in tail_ids:
+            print_wc(f"[{short_id}] {content}", fg_id=37)  # beyaz
+        else:
+            print_wc(f"[{short_id}] {content}", fg_id=32)  # yeşil
+
 
 def link_notes(id1, id2):
     links = load_data(LINKS_FILE)
@@ -142,24 +154,28 @@ def link_notes(id1, id2):
 def show_note(id_):
     notes = load_data(NOTES_FILE)
     links = load_data(LINKS_FILE)
-    short_map = load_data(SHORTMAP_FILE)
 
     full_id = resolve_id(id_)
     if not full_id or full_id not in notes:
         print("Not bulunamadı.")
         return
 
-    print(f"[{get_short_id(full_id)}] {notes[full_id]}")
-    
+    # Tail olup olmadığını kontrol et
+    is_tail = any(full_id in targets for targets in links.values())
+    color = 37 if is_tail else 32
+
+    print_wc(f"[{get_short_id(full_id)}] {notes[full_id]}", fg_id=color)
+
     linked = links.get(full_id, [])
     if linked:
         print("\nBağlantılı notlar:")
         for lid in linked:
             short = get_short_id(lid)
             content = notes.get(lid, "---")
-            print(f"  - [{short}] {content}")
+            print_wc(f"  - [{short}] {content}", fg_id=37)  # Kuyruk notlar varsayılan beyaz
     else:
         print("\nBağlantı yok.")
+
 
 def export_notes():
     notes = load_data(NOTES_FILE)
@@ -223,7 +239,7 @@ def interactive_mode():
 
     while True:
         try:
-            set_color(34)
+            set_color(33)
             raw = input(">>> ").strip()
             reset_color()
             if not raw:
