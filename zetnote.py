@@ -10,6 +10,15 @@ NOTES_FILE = os.path.join(DATA_DIR, "notes.json")
 LINKS_FILE = os.path.join(DATA_DIR, "links.json")
 SHORTMAP_FILE = os.path.join(DATA_DIR, "shortmap.json")
 
+def set_color(fg_id = 39, bg_id = 49):
+    print(f"\033[{bg_id}m\033[{fg_id}m")
+
+def print_wc(text, fg_id = 39, bg_id = 49):
+    print(f"\033[{bg_id}m\033[{fg_id}m{text}")
+
+def reset_color():
+    set_color(0)
+
 def load_data(file):
     if not os.path.exists(file):
         return {}
@@ -207,13 +216,16 @@ def export_related_notes(id_):
     print(f"Not ve bağlantılı notlar dışa aktarıldı: {export_path}")
 
 def interactive_mode():
-    print("Zettelkasten CLI'ye hoş geldin!")
-    print(f"Veri klasörü: {DATA_DIR}")
-    print("Komutlar: add | delete | link | list | show | export[-related] | exit\n")
+    print_wc("Zettelkasten CLI'ye hoş geldin!", 32)
+    print_wc(f"Veri klasörü: \033[31m{DATA_DIR}", 32)
+    print_wc("Komutlar: add | delete | link | list | show | export[-related] | exit", 32)
+    reset_color()
 
     while True:
         try:
+            set_color(34)
             raw = input(">>> ").strip()
+            reset_color()
             if not raw:
                 continue
             args = raw.split()
